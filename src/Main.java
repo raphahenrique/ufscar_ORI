@@ -1,5 +1,6 @@
 import javax.print.DocFlavor;
 import java.io.*;
+import java.util.ArrayList;
 
 public class Main {
 
@@ -29,21 +30,44 @@ public class Main {
             File diretorio = new File(diretorioPath);
             File[] listaArquivos = diretorio.listFiles();//Uma lista de tudo dentro do diretorio
 
+            ArrayList<String> arquivos = new ArrayList<String>();
+            ArrayList<File[]> subdiretorios = new ArrayList<File[]>();
+
+            String strNovoArquivo="";
+
+
             for(int i = 0;i<listaArquivos.length;i++){
-                if(listaArquivos[i].isFile()){//COMPACTAR ARQUIVOS EM UM
-                    compacta_arquivos(listaArquivos);
-
-
+                if(listaArquivos[i].isFile()){
+                    arquivos.add(listaArquivos[i].getName());
                 }else if (listaArquivos[i].isDirectory()){//caso de subdiretorios
-
-
+                    File sub_diretorio = new File(listaArquivos[i].getPath()+"\\");
+                    File[] listaArquivos_subdiretorio = sub_diretorio.listFiles();//Uma lista de tudo dentro do diretorio
+                    subdiretorios.add(listaArquivos_subdiretorio);
                 }
             }
-        }
 
+            if(arquivos.isEmpty()){
+                System.out.println("ERRO: NENHUM ARQUIVO ENCONTRADO no diretorio :" + listaArquivos[0].getParent());
+            }else{
+                System.out.println("Quantidade de arquivos: " + arquivos.size());
+                strNovoArquivo += compacta_arquivos(listaArquivos);
+            }
+
+            if(!subdiretorios.isEmpty()){
+                System.out.println("Quantidade de subdiretorios: " + subdiretorios.size());
+                for(int i = 0; i<=subdiretorios.size()-1;i++){
+                   strNovoArquivo += compacta_arquivos(subdiretorios.get(i));
+                }
+
+            }
+
+            gera_novo_arquivo(strNovoArquivo);
+
+        }
     }
 
-    public static void compacta_arquivos(File[] listaArquivos){
+
+    public static String compacta_arquivos(File[] listaArquivos){
         int ch;
         String strNovoArquivo = "";
         File file = null;
@@ -51,8 +75,8 @@ public class Main {
 
         /*
         SALVAR NOME DO DIRETORIO PARA RECUPERAR DEPOIS
-        ALGO COMO ?? :
-                    &&diretorioName&&arquivo1#$#arquivo2#$#arquivo#$#
+        ALGO COMO:
+            &&diretorioName&&arquivo1#$#arquivo2#$#arquivo#$#&&diretorio2Name&&arquivo1#$#arquivo2#$#arquivo#$#
 
          */
         if(listaArquivos[0]!=null){
@@ -63,12 +87,15 @@ public class Main {
         }
 
         for(int i = 0; i<listaArquivos.length;i++){
+            if(listaArquivos[i].isFile()){
 
-            strNovoArquivo += DELIMITADOR_ARQUIVOS + le_arquivo(listaArquivos[i].getName());
+                strNovoArquivo += DELIMITADOR_ARQUIVOS + le_arquivo(listaArquivos[i].getPath()+"\\"
+                        ,listaArquivos[i].getName());
 
+            }
         }
 
-        gera_novo_arquivo(strNovoArquivo);
+        return strNovoArquivo;
 
     }
 
@@ -124,15 +151,20 @@ public class Main {
         }else
             return false;
     }
-    
 
-    public static StringBuffer le_arquivo(String nomeArquivo){
+
+    public static StringBuffer le_arquivo(String diretorio, String nomeArquivo){
         int ch;
         StringBuffer strContent = new StringBuffer("");
         File file = null;
         FileInputStream fInput = null;
+        System.out.println(diretorio);
+        System.out.println(nomeArquivo);
+
+        System.out.println("");
+
         try {
-            file = new File(diretorio + nomeArquivo);
+            file = new File(diretorio);
             fInput = new FileInputStream(file);
 
             while ((ch=fInput.read()) !=-1){
