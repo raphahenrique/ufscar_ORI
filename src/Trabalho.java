@@ -1,11 +1,11 @@
-import javax.print.DocFlavor;
 import java.io.*;
 import java.util.ArrayList;
 
-public class Main {
+public class Trabalho {
 
-    static final String DELIMITADOR_ARQUIVOS = "#$#";
-    static final String DELIMITADOR_DIRETORIOS = "&&";
+    static final String DELIMITADOR_ARQUIVOS = "#"; // Delimitador entre arquivos
+    static final String DELIMITADOR_NOME_ARQUIVO = "|"; // Delimitador do conteudo do arquivo com o nome dele.
+    static final String DELIMITADOR_DIRETORIOS = "&"; // Delimitador para saber quando comeca outro diretorio.
 
     static final File arquivo_final = new File("DIRETORIO/");
     static final String diretorio ="DIRETORIO/";
@@ -15,9 +15,18 @@ public class Main {
 
     public static void main (String[] args){
         //String workingDir = System.getProperty("user.id");
-
+//        if (args[0].equals("-c")){
+//            compacta_diretorio(args[1]);
+//        }
+//        else if(args[0].equals("-e")){
+//            descompactar(args[1]);
+//        }
+//        else if(args[0].equals("-l"))
+//        {
+//
+//        }
         compacta_diretorio(diretorio);
-
+        descompactar("C:\\Users\\User\\Documents\\GitHub\\ufscar_ORI\\novo_arquivo.sar");
 
     }
 
@@ -25,7 +34,7 @@ public class Main {
     public static void compacta_diretorio(String diretorioPath){
 
         if(!isDirectory(diretorioPath)){
-            System.out.println("ERRO: CAMINHO INFORMADO N√ÉO √â UM DIRETORIO V√ÅLIDO!!");
+            System.out.println("ERRO: CAMINHO INFORMADO NAO E UM DIRETORIO VALIDO!!");
         }else{
             File diretorio = new File(diretorioPath);
             File[] listaArquivos = diretorio.listFiles();//Uma lista de tudo dentro do diretorio
@@ -41,7 +50,7 @@ public class Main {
                     arquivos.add(listaArquivos[i].getName());
                 }else if (listaArquivos[i].isDirectory()){//caso de subdiretorios
                     File sub_diretorio = new File(listaArquivos[i].getPath()+"\\");
-                    File[] listaArquivos_subdiretorio = sub_diretorio.listFiles();//Uma lista de tudo dentro do diretorio
+                    File[] listaArquivos_subdiretorio = sub_diretorio.listFiles();//Uma lista de tudo dentro do sub_diretorio
                     subdiretorios.add(listaArquivos_subdiretorio);
                 }
             }
@@ -80,13 +89,12 @@ public class Main {
 
          */
         if(listaArquivos[0]!=null){
-            strNovoArquivo+=DELIMITADOR_DIRETORIOS + listaArquivos[0].getParent()
-                        + DELIMITADOR_DIRETORIOS;
+            strNovoArquivo+=DELIMITADOR_DIRETORIOS + listaArquivos[0].getParent();
         }else{
             Exception e_1 = new Exception("erro na lista de arquivos");
         }
 
-        for(int i = 0; i<listaArquivos.length;i++){
+        for(int i = 0; i<listaArquivos.length ;i++){
             if(listaArquivos[i].isFile()){
 
                 strNovoArquivo += DELIMITADOR_ARQUIVOS + le_arquivo(listaArquivos[i].getPath()+"\\"
@@ -107,7 +115,7 @@ public class Main {
         FileOutputStream foutput = null;
 
         try {
-            file = new File(diretorio + "novo_arquivo.sar");
+            file = new File("C:\\Users\\User\\Documents\\GitHub\\ufscar_ORI\\" + "novo_arquivo.sar");
 
             foutput = new FileOutputStream(file);
 
@@ -170,6 +178,7 @@ public class Main {
             while ((ch=fInput.read()) !=-1){
                 strContent.append((char)ch);
             }
+            strContent.append(DELIMITADOR_NOME_ARQUIVO + nomeArquivo);
 
             fInput.close();
 
@@ -184,7 +193,75 @@ public class Main {
 
 
     public static void descompactar(String arquivoSAR){
+        String arquivo = "";
+        String path_arquivo = "";
+        String nome_diretorio = "";
+        InputStream input;
+        try{
+            input = new FileInputStream(arquivoSAR);
+            int data = input.read();
 
+            while (data != -1) {
+
+                if((char) data != '|' && (char)data != '&'){ // Leio o arquivo inteiro ate chegar no delimitador |
+                    //significa que os proximos caracteres ser„o o nome do arquivo
+                    arquivo += (char) data;
+                }
+                else if((char)data == '&'){
+                    nome_diretorio = "1";
+                    data = input.read();
+                    while((char) data != '#'){
+                        nome_diretorio += (char) data; // Aqui o nome do diretorio È separado e colocado na variavel nome_diretorio
+                        data = input.read();// O delimitador final do nome do diretorio È #, que È o inicio de um arquivo tambem
+                    }
+                    Cria_Diretorio(nome_diretorio);
+                }
+                else{ // Significa que chegou na parte final do arquivo, onde se encontra o nome dele.
+                    data = input.read();
+                    while((char) data != '#' && data != -1 && (char)data != '&' ){
+                        path_arquivo += (char) data; // Aqui o nome do arquivo È separado e colocado na variavel path_arquivo
+                        data = input.read();// O delimitador final do arquivo pode ser os caracteres #, & ou o final do arquivo EOF.
+                    }
+                    Cria_arquivo(arquivo, nome_diretorio + "\\" + path_arquivo);
+                    path_arquivo = ""; // È necessario apagar o conteudo de path_arquivo, pois esta variavel
+                    // ira armazenar o nome do proximo arquivo que vai ser criado.
+
+                    arquivo = ""; // È necessario apagar o conteudo de arquivo, pois esta variavel ira armazenar o conteudo
+                    //do proximo arquivo que vai ser criado
+                }
+                if((char)data != '&')
+                    data = input.read();
+
+            }
+            input.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    public static void Cria_arquivo(String text, String nomeArquivo){
+
+        try {
+            FileWriter arquivo;
+            arquivo = new FileWriter(new File(nomeArquivo)); // Crio o arquivo com o nome de nomeArquivo.
+            arquivo.write(text); // Aqui È o conteudo do arquivo. O nome e o conteudo do arquivo foram passador por parametros.
+            arquivo.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void Cria_Diretorio(String nomeDiretorio){
+        try {
+            File diretorio = new File(nomeDiretorio);
+            diretorio.mkdir();
+        }catch (Exception ex){
+            System.out.println("Erro ao criar o diretorio");
+        }
     }
 
 
