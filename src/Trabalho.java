@@ -15,18 +15,21 @@ public class Trabalho {
 
     public static void main (String[] args){
         //String workingDir = System.getProperty("user.id");
-//        if (args[0].equals("-c")){
-//            compacta_diretorio(args[1]);
-//        }
-//        else if(args[0].equals("-e")){
-//            descompactar(args[1]);
-//        }
-//        else if(args[0].equals("-l"))
-//        {
-//
-//        }
-        compacta_diretorio(diretorio);
-        descompactar("C:\\Users\\User\\Documents\\GitHub\\ufscar_ORI\\novo_arquivo.sar");
+
+        if (args[0].equals("-c")){
+            compacta_diretorio(args[1]);
+            System.out.println("0: Execucao bem sucedida");
+        }
+        else if(args[0].equals("-e")){
+            descompactar(args[1]);
+            System.out.println("0: Execucao bem sucedida");
+        }
+        else if(args[0].equals("-l")) {
+
+        }
+
+        //compacta_diretorio(diretorio);
+        //descompactar("compactado.sar");
 
     }
 
@@ -34,7 +37,7 @@ public class Trabalho {
     public static void compacta_diretorio(String diretorioPath){
 
         if(!isDirectory(diretorioPath)){
-            System.out.println("ERRO: CAMINHO INFORMADO NAO E UM DIRETORIO VALIDO!!");
+            System.out.println("1: CAMINHO INFORMADO NÃO E UM DIRETORIO VALIDO!!");
         }else{
             File diretorio = new File(diretorioPath);
             File[] listaArquivos = diretorio.listFiles();//Uma lista de tudo dentro do diretorio
@@ -115,7 +118,7 @@ public class Trabalho {
         FileOutputStream foutput = null;
 
         try {
-            file = new File("C:\\Users\\User\\Documents\\GitHub\\ufscar_ORI\\" + "novo_arquivo.sar");
+            file = new File("compactado.sar");
 
             foutput = new FileOutputStream(file);
 
@@ -142,7 +145,7 @@ public class Trabalho {
             }
         }
 
-        System.out.println(strNovoArquivo);
+        //System.out.println(strNovoArquivo);
 
     }
 

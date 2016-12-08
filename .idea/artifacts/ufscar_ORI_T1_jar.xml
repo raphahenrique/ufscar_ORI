@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ufscar_ORI_T1:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ufscar_ORI_T1_jar</output-path>
+    <root id="archive" name="ufscar_ORI_T1.jar">
+      <element id="module-output" name="ufscar_ORI_T1" />
+    </root>
+  </artifact>
+</component>

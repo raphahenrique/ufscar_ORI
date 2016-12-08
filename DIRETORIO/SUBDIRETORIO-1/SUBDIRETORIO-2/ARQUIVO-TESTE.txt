@@ -1,2 +1,0 @@
-Teste para saber
-se cria diretorios dentro de diretorios.
