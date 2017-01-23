@@ -7,15 +7,14 @@ public class Trabalho {
     static final String DELIMITADOR_NOME_ARQUIVO = "|"; // Delimitador do conteudo do arquivo com o nome dele.
     static final String DELIMITADOR_DIRETORIOS = "&"; // Delimitador para saber quando comeca outro diretorio.
 
-    static final File arquivo_final = new File("DIRETORIO/");
-    static final String diretorio ="DIRETORIO/";
-    static final String file_name = "arquivo-0.txt";
+//    static final File arquivo_final = new File("DIRETORIO/");
+//    static final String diretorio ="DIRETORIO/";
+//    static final String file_name = "arquivo-0.txt";
 
 
 
     public static void main (String[] args){
         //String workingDir = System.getProperty("user.id");
-
         if (args[0].equals("-c")){
             compacta_diretorio(args[1]);
             System.out.println("0: Execucao bem sucedida");
@@ -24,39 +23,105 @@ public class Trabalho {
             descompactar(args[1]);
             System.out.println("0: Execucao bem sucedida");
         }
-        else if(args[0].equals("-l")) {
-
+        else if(args[0].equals("-l"))
+        {
+            Listagem(args[1]);
+            System.out.println("0: Execucao bem sucedida");
         }
 
-        //compacta_diretorio(diretorio);
-        //descompactar("compactado.sar");
+//        compacta_diretorio(diretorio);
+//        descompactar("C:\\Users\\User\\Documents\\GitHub\\ufscar_ORI\\novo_arquivo.sar");
 
     }
 
+    public static void Listagem(String pasta) {
+        if (!isDirectory(pasta)) {
+            throw new IllegalArgumentException("pasta não é um Diretorio");
+        }
+        int count= 0;
+        StringBuilder pt= new StringBuilder();
+        listagem(pasta, count, pt);
+
+        System.out.println(pt.toString());
+    }
+
+    private static void listagem(String pasta, int count, StringBuilder pt) {
+        if (!isDirectory(pasta)) {
+            throw new IllegalArgumentException("Pasta nao é um diretorio");
+        }
+        File folder = new File(pasta);
+        pt.append(getCountString(count));
+        pt.append("+--");
+        pt.append(folder.getName());
+        pt.append("/");
+        pt.append("\n");
+        File[] arquivo = folder.listFiles();
+        for (int i = 0; i<arquivo.length;i++) {
+            if (arquivo[i].isDirectory()) {
+                listagem(arquivo[i].getPath(), count + 1, pt);
+            } else {
+                printArquivo(arquivo[i], count + 1, pt);
+            }
+        }
+
+    }
+
+    private static void printArquivo(File arquivo, int count, StringBuilder pt) {
+        pt.append(getCountString(count));
+        pt.append("+--");
+        pt.append(arquivo.getName());
+        pt.append("\n");
+    }
+
+    private static String getCountString(int count) {
+        StringBuilder pt = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            pt.append("|  ");
+        }
+        return pt.toString();
+    }
 
     public static void compacta_diretorio(String diretorioPath){
 
         if(!isDirectory(diretorioPath)){
-            System.out.println("1: CAMINHO INFORMADO NÃO E UM DIRETORIO VALIDO!!");
+            System.out.println("ERRO: CAMINHO INFORMADO NAO E UM DIRETORIO VALIDO!!");
         }else{
             File diretorio = new File(diretorioPath);
             File[] listaArquivos = diretorio.listFiles();//Uma lista de tudo dentro do diretorio
+            File[] listaArquivos_subdiretorio = new File[0];
+            File sub_diretorio;
 
             ArrayList<String> arquivos = new ArrayList<String>();
             ArrayList<File[]> subdiretorios = new ArrayList<File[]>();
 
             String strNovoArquivo="";
 
-
+            // Verifica e retorna os arquivos e diretorios do arquivo principal
             for(int i = 0;i<listaArquivos.length;i++){
                 if(listaArquivos[i].isFile()){
                     arquivos.add(listaArquivos[i].getName());
                 }else if (listaArquivos[i].isDirectory()){//caso de subdiretorios
-                    File sub_diretorio = new File(listaArquivos[i].getPath()+"\\");
-                    File[] listaArquivos_subdiretorio = sub_diretorio.listFiles();//Uma lista de tudo dentro do sub_diretorio
+                    sub_diretorio = new File(listaArquivos[i].getPath()+"\\");
+                    listaArquivos_subdiretorio = sub_diretorio.listFiles();//Uma lista de tudo dentro do sub_diretorio
                     subdiretorios.add(listaArquivos_subdiretorio);
                 }
             }
+//            int j = 0;
+//            listaArquivos = null;
+//            while(j == 0){
+//                int aux = listaArquivos_subdiretorio.length;
+//                for (int i = 0; i < aux; i++) {
+//                    if(listaArquivos_subdiretorio[i].isFile()){
+//                        arquivos.add(listaArquivos[i].getName());
+//                    }
+//                    else if(listaArquivos_subdiretorio[i].isDirectory()){
+//                        sub_diretorio = new File(listaArquivos[i].getPath() + "\\");
+//                        listaArquivos_subdiretorio = sub_diretorio.listFiles();
+//                        subdiretorios.add(listaArquivos_subdiretorio);
+//                    }
+//                }
+//
+//            }
 
             if(arquivos.isEmpty()){
                 System.out.println("ERRO: NENHUM ARQUIVO ENCONTRADO no diretorio :" + listaArquivos[0].getParent());
@@ -68,7 +133,7 @@ public class Trabalho {
             if(!subdiretorios.isEmpty()){
                 System.out.println("Quantidade de subdiretorios: " + subdiretorios.size());
                 for(int i = 0; i<=subdiretorios.size()-1;i++){
-                   strNovoArquivo += compacta_arquivos(subdiretorios.get(i));
+                    strNovoArquivo += compacta_arquivos(subdiretorios.get(i));
                 }
 
             }
@@ -118,7 +183,7 @@ public class Trabalho {
         FileOutputStream foutput = null;
 
         try {
-            file = new File("compactado.sar");
+            file = new File("COMPACTADO.sar");
 
             foutput = new FileOutputStream(file);
 
@@ -211,11 +276,12 @@ public class Trabalho {
                     arquivo += (char) data;
                 }
                 else if((char)data == '&'){
-                    nome_diretorio = "1";
+                    nome_diretorio = "";
                     data = input.read();
-                    while((char) data != '#'){
+                    while((char) data != '#' && data != -1){
                         nome_diretorio += (char) data; // Aqui o nome do diretorio é separado e colocado na variavel nome_diretorio
-                        data = input.read();// O delimitador final do nome do diretorio é #, que é o inicio de um arquivo tambem
+                        data = input.read();// O delimitador final do nome do diretorio é #, que é o inicio de um arquivo
+                        // ou EOF que é o final do arquivo.
                     }
                     Cria_Diretorio(nome_diretorio);
                 }
