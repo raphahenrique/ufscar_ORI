@@ -43,6 +43,10 @@ int Verifica_num_chaves(No atual){
         return 0;
 }
 
+/*
+se o numero de chaves for maior que maximo: 2t-1 chaves,
+vai dividir o no
+*/
 void Divide_No(No *atual){
 
 
