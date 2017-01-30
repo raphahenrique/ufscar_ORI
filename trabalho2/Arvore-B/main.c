@@ -30,7 +30,7 @@ struct No
 
 int Verifica_num_chaves(No atual);
 void Divide_No(No *atual);
-void Inserindo_chave(No *atual);
+void Inserindo_chave(No *atual, int key);
 int Busca_chave(No *atual, int key);
 void Criar_arvore(No *atual);
 
@@ -53,11 +53,9 @@ void Divide_No(No *atual){
 
 }
 
-void Inserindo_chave(No *atual){
+void Inserindo_chave(No *atual, int key){
     int aux = Verifica_num_chaves(*atual);
-    int key;
-    printf("Insira a chave: ");
-    scanf("%d", &key);
+    
     if(aux == 1){
         atual->chave[atual->num_chaves] = key;
         atual->num_chaves++;
@@ -99,29 +97,36 @@ int main()
     T = malloc(MAX * sizeof(No));
     Criar_arvore(&T);
     int key;
-    printf("Informe a chave: ");
-    scanf("%d", &key);
-    Busca_chave(&T, key);
+    int opcao;
 
     printf("Digite o grau da Arvore B: ");
     scanf("%d", &grau_arvore);
 
     mediana = grau_arvore/2;
     printf("%d", mediana);
-    /*do{
+
+    printf("ESCOLHA SUA OPCAO: \n\n\n\t 1. INSERCAO\n\t 2.Busca\n\t 3.Sair");
+    scanf("%d", &opcao);
+
+    do{
         switch(opcao){
 
         case 1:
-            Inserindo_chave(&raiz);
+            printf("Informe a chave: ");
+            scanf("%d", &key);
+            Inserindo_chave(&T, key);
             break;
         case 2:
-            Buscando_chave(&raiz);
+            printf("Informe a chave: ");
+            scanf("%d", &key);
+            Busca_chave(&T, key);
+
             break;
         case 3:
             printf("Saindo...");
             break;
         }
-    }while opcao != 3;*/
+    }while (opcao!= 3);
 
     return 0;
 }
