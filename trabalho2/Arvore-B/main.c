@@ -2,10 +2,24 @@
 #include <stdlib.h>
 #define MAX 1000
 
+/*
+NOMES:  
+        JORGE
+        LUCAS
+        RAPHAEL
+
+*/
 typedef struct No No;
 int grau_arvore;
 int mediana;
 
+/*Cada nó, possui:
+chave[max-1]: as chaves, em ordem crescente
+num_chaves: numero de chaves do nó
+folha: 1 - se é nó folha, 0 - se é nó interno
+raiz: se é nó raiz ou não
+ponteiro: ponteiros para os filhos do nó
+*/
 struct No
 {
     int chave[MAX-1];
@@ -13,6 +27,13 @@ struct No
     int num_chaves, folha, raiz;
     No *ponteiro[MAX];
 };
+
+int Verifica_num_chaves(No atual);
+void Divide_No(No *atual);
+void Inserindo_chave(No *atual);
+int Busca_chave(No *atual, int key);
+void Criar_arvore(No *atual);
+
 
 int Verifica_num_chaves(No atual){
     if(atual.raiz == 1 || atual.num_chaves >= (grau_arvore - 1) && atual.num_chaves <= (2 * grau_arvore - 1)  )
