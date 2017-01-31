@@ -1,12 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX 1000
+#define MAX 100
 
 /*
-NOMES:  
-        JORGE
-        LUCAS
-        RAPHAEL
+*****************TRABALHO 2******************
+ORI (ORGANIZACAO E RECUPERACAO DA INFORMACAO)
+-----------------ARVORE-B--------------------
+
+INTEGRANTES DO GRUPO:
+
+JORGE
+LUCAS
+RAPHAEL
 
 */
 typedef struct No No;
@@ -22,7 +27,7 @@ ponteiro: ponteiros para os filhos do nó
 */
 struct No
 {
-    int chave[MAX-1];
+    int chave[MAX - 1];
     int id;
     int num_chaves, folha, raiz;
     No *ponteiro[MAX];
@@ -33,61 +38,83 @@ void Divide_No(No *atual);
 void Inserindo_chave(No *atual, int key);
 int Busca_chave(No *atual, int key);
 void Criar_arvore(No *atual);
+void Mostra_arvore(No *raiz);
 
-
-int Verifica_num_chaves(No atual){
-    if(atual.raiz == 1 || atual.num_chaves >= (grau_arvore - 1) && atual.num_chaves <= (2 * grau_arvore - 1)  )
+int Verifica_num_chaves(No atual) {
+    if (atual.raiz == 1 || atual.num_chaves >= (grau_arvore - 1) && atual.num_chaves <= (2 * grau_arvore - 1))
         return 1;
-    else if(atual.num_chaves >= grau_arvore)
+    else if (atual.num_chaves >= grau_arvore)
         Divide_No(&atual);
-        return 0;
+    return 0;
 }
 
 /*
-se o numero de chaves for maior que maximo: 2t-1 chaves,
+Se o numero de chaves for maior que maximo: 2t-1 chaves,
 vai dividir o no
 */
-void Divide_No(No *atual){
-
-
+void Divide_No(No *atual) {
+    
+    
 
 }
 
-void Inserindo_chave(No *atual, int key){
-    int aux = Verifica_num_chaves(*atual);
+void Mostra_arvore(No *raiz) {
     
-    if(aux == 1){
+    for (int i = 0; i <= (raiz->num_chaves); i++) {
+        int num_chaves_filho;
+        if (raiz->ponteiro[i] != NULL) {
+            num_chaves_filho = raiz->ponteiro[i]->num_chaves;
+        
+            for (int j = 0; j <= num_chaves_filho; j++) {
+                printf("valor i %d", i);
+                printf("valor j %d", j);
+            }
+        }
+    }
+
+}
+
+void Inserindo_chave(No *atual, int key) {
+    int aux = Verifica_num_chaves(*atual);
+
+    if (aux == 1) {
         atual->chave[atual->num_chaves] = key;
         atual->num_chaves++;
         printf("Num chaves: %d", atual->num_chaves);
     }
+    else{
+        
+    }
 }
 
-int Busca_chave(No *atual, int key){
+int Busca_chave(No *atual, int key) {
     int i = -1;
 
-    do{
-            if(key == atual->chave[i]){
-                printf("Foi encontrada no indice: %d", i);
-                return key;
-            }
-            if(atual->folha == 0){
-                if(key < atual->chave[i] && atual->folha == 0)
-                        return Busca_chave(&atual->ponteiro[i], key);
-                else if(i == atual->num_chaves && key > atual->chave[i])
-                        return Busca_chave(&atual->ponteiro[i+1], key);
-                    i++;
-            }
+    do {
+        if (key == atual->chave[i]) {
+            printf("Foi encontrada no indice: %d", i);
+            return key;
+        }
+        if (atual->folha == 0) {
+            if (key < atual->chave[i] && atual->folha == 0)
+                return Busca_chave(&atual->ponteiro[i], key);
+            else if (i == atual->num_chaves && key > atual->chave[i])
+                return Busca_chave(&atual->ponteiro[i + 1], key);
+            i++;
+        }
     } while (i == atual->num_chaves + 1);
     printf("Busca sem sucesso");
     return 0;
 }
 
-void Criar_arvore(No *atual){
+void Criar_arvore(No *atual) {
+
     atual->ponteiro[0] = NULL;
+
     atual->num_chaves = 0;
     atual->raiz = 1;
     atual->folha = 1;
+
 }
 
 
@@ -102,14 +129,15 @@ int main()
     printf("Digite o grau da Arvore B: ");
     scanf("%d", &grau_arvore);
 
-    mediana = grau_arvore/2;
+    mediana = grau_arvore / 2;
     printf("%d", mediana);
 
-    printf("ESCOLHA SUA OPCAO: \n\n\n\t 1. INSERCAO\n\t 2.Busca\n\t 3.Sair");
-    scanf("%d", &opcao);
+    
+    do {
+        printf("\n-------ESCOLHA SUA OPCAO-------:\n\n\t 1.Insercao\n\t 2.Busca\n\t 3.Sair\n4.Mostra arvore\n");
+        scanf("%d", &opcao);
 
-    do{
-        switch(opcao){
+        switch (opcao) {
 
         case 1:
             printf("Informe a chave: ");
@@ -125,8 +153,11 @@ int main()
         case 3:
             printf("Saindo...");
             break;
+        case 4:
+            Mostra_arvore(&T);
+            break;
         }
-    }while (opcao!= 3);
+    } while (opcao != 3);
 
     return 0;
 }
