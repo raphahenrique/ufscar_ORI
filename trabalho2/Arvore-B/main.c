@@ -51,7 +51,7 @@ int Busca_chave(No atual, int key){
             else if(key < atual.chave[i] && atual.folha == 0)
                 return Busca_chave(*atual.ponteiro[i], key);
 
-            else if(i == atual.num_chaves && key > atual.chave[i])
+            else if(i == atual.num_chaves && key > atual.chave[i] && atual.folha == 0)
                 return Busca_chave(*atual.ponteiro[i+1], key);
             i++;
 
@@ -105,6 +105,12 @@ int main()
     filho5.chave[1] = 32;
     filho5.chave[2] = 33;
     filho5.chave[3] = 40;
+    
+    filho1.folha = 1;
+    filho2.folha = 1;
+    filho3.folha = 1;
+    filho4.folha = 1;
+    filho5.folha = 1;
 
     filho1.num_chaves = 4;
     filho2.num_chaves = 4;
