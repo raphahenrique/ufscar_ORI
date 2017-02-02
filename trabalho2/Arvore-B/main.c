@@ -3,18 +3,19 @@
 #define MAX 1000
 
 typedef struct No No;
-int grau_arvore;
+int grau_arvore, count = 0;
+char caminho[100];
 
 struct No
 {
     int chave[MAX-1];
     int id;
     int num_chaves, folha, raiz;
-    No *ponteiro[MAX];
+    No *ponteiro[MAX], *pai;
 };
 
-int mediana (No atual){
-    int aux = atual.num_chaves / 2 + 1;
+int mediana (No *atual){
+    int aux = atual->num_chaves / 2 + 1;
     return aux;
 
 }
@@ -34,7 +35,7 @@ int Verifica_num_chaves(No *atual){
 }
 
 void Divide_No(No *atual){
-    int aux = mediana(*atual) - 1;
+    int aux = mediana(atual) - 1;
     No filhodir, filhoesq;
     int i;
     int j = 0;
@@ -53,8 +54,43 @@ void Divide_No(No *atual){
     filhoesq.folha = 1;
     atual->ponteiro[0] = &filhoesq;
     atual->ponteiro[1] = &filhodir;
+    filhoesq.pai = &atual;
+    filhodir.pai = &atual;
     atual->chave[0] = atual->chave[aux];
     atual->num_chaves = 1;
+}
+
+void Divide_no_filho(No *atual){
+    int aux = mediana(atual) - 1;
+    int i;
+    int j;
+    int k = 0;
+    atual->pai->chave[atual->pai->num_chaves] = atual->chave[aux];
+    atual->pai->num_chaves++;
+    qsort(atual->pai->chave, atual->pai->num_chaves, sizeof(int), cmpfunc);
+    for(i=0;i< atual->pai->num_chaves ;i++){
+        if(atual->pai->chave[i] == atual->chave[aux])
+            j = i; // j é a posicao que a chave que foi para o pai se encontra.
+    }
+    No novo;
+    novo.num_chaves = 0;
+    int cont = atual->num_chaves;
+    for(i=aux+1;i< cont;i++){
+        novo.chave[k] = atual->chave[i];
+        novo.num_chaves++;
+        atual->num_chaves--;
+        k++;
+    }
+    atual->num_chaves--;
+    novo.pai = atual->pai;
+    novo.folha = 1;
+    printf("%d ", atual->pai->num_chaves);
+    for(i=atual->pai->num_chaves; i>j+1; i-- ){
+        atual->pai->ponteiro[i] = atual->pai->ponteiro[i-1];// Ponteiro
+    }
+    atual->pai->ponteiro[i] = &novo;
+
+
 }
 
 void Inserindo_chave(No *atual, int key){
@@ -65,36 +101,50 @@ void Inserindo_chave(No *atual, int key){
     if(aux == 1 && atual->folha == 1){
         atual->chave[atual->num_chaves] = key;
         atual->num_chaves++;
-        printf("Num chaves: %d \n", atual->num_chaves);
+        qsort(atual->chave, atual->num_chaves, sizeof(int), cmpfunc);
     }
     else if(aux == 1 && atual->folha == 0){
             for(i=0; i<atual->num_chaves ;i++){
-                if(key < atual->chave[i])
+                if(key < atual->chave[i]){
                     Inserindo_chave(atual->ponteiro[i], key);
+                    break;}
                 else if(i == atual->num_chaves - 1 && key > atual->chave[i])
                     Inserindo_chave(atual->ponteiro[i+1], key);
             }
     }
-    else{
+    else if(aux == 0 && atual->raiz == 1){
         atual->chave[atual->num_chaves] = key;
         atual->num_chaves++;
         qsort(atual->chave, atual->num_chaves, sizeof(int), cmpfunc);
         Divide_No(atual);
         atual->folha = 0;
     }
-    qsort(atual->chave, atual->num_chaves, sizeof(int), cmpfunc);
+    else if(aux == 0 && atual->folha == 1){
+        atual->chave[atual->num_chaves] = key;
+        atual->num_chaves++;
+        qsort(atual->chave, atual->num_chaves, sizeof(int), cmpfunc);
+        Divide_no_filho(atual);
+
+    }
 }
 
 int Busca_chave(No atual, int key){
     int i = 0;
-
+    No *pont;
     do{
             if(key == atual.chave[i]){
                 printf("Foi encontrada no indice: %d", i);
+                while(pont !=NULL){
+                    pont = atual.pai;
+                    count++;
+                }
                 return key;
             }
-            else if(key < atual.chave[i] && atual.folha == 0)
-                return Busca_chave(*atual.ponteiro[i], key);
+            else if(key < atual.chave[i] && atual.folha == 0){
+                    sprintf(caminho, "%d", i);
+                    count++;
+                    return Busca_chave(*atual.ponteiro[i], key);
+            }
 
             else if(i == atual.num_chaves-1 && key > atual.chave[i] && atual.folha == 0)
                 return Busca_chave(*atual.ponteiro[i+1], key);
@@ -110,14 +160,23 @@ void Criar_arvore(No *atual){
     atual->num_chaves = 0;
     atual->raiz = 1;
     atual->folha = 1;
+    atual->pai = NULL;
 
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     No T;
-    //No filho1, filho2, filho3, filho4, filho5;
-    Criar_arvore(&T);
+    if (argc==3)
+    {
+        Criar_arvore(&T);
+        printf("Arvore criada com sucesso.");
+    }
+
+    grau_arvore = atoi(argv[2]);
+
+    No filho1, filho2, filho3, filho4, filho5;
+
     int key;
 
     /*T.chave[0] = 10;
@@ -129,26 +188,27 @@ int main()
     T.ponteiro[2] = &filho3;
     T.ponteiro[3] = &filho4;
     T.ponteiro[4] = &filho5;
+
     filho1.chave[0] = 5;
     filho1.chave[1] = 6;
     filho1.chave[2] = 7;
     filho1.chave[3] = 8;
+    filho1.chave[4] = 9;
+
     filho2.chave[0] = 11;
     filho2.chave[1] = 12;
-    filho2.chave[2] = 13;
-    filho2.chave[3] = 14;
+
     filho3.chave[0] = 16;
     filho3.chave[1] = 17;
-    filho3.chave[2] = 18;
-    filho3.chave[3] = 19;
+
     filho4.chave[0] = 21;
     filho4.chave[1] = 22;
     filho4.chave[2] = 23;
     filho4.chave[3] = 24;
+    filho4.chave[4] = 28;
+
     filho5.chave[0] = 31;
     filho5.chave[1] = 32;
-    filho5.chave[2] = 33;
-    filho5.chave[3] = 40;
 
     filho1.folha = 1;
     filho2.folha = 1;
@@ -156,26 +216,57 @@ int main()
     filho4.folha = 1;
     filho5.folha = 1;
 
-    filho1.num_chaves = 4;
-    filho2.num_chaves = 4;
-    filho3.num_chaves = 4;
-    filho4.num_chaves = 4;
-    filho5.num_chaves = 4;
+    filho1.num_chaves = 5;
+    filho2.num_chaves = 2;
+    filho3.num_chaves = 2;
+    filho4.num_chaves = 5;
+    filho5.num_chaves = 2;
+
+    filho1.pai = &T;
+    filho2.pai = &T;
+    filho3.pai = &T;
+    filho4.pai = &T;
+    filho5.pai = &T;
 
     T.num_chaves = 4;
+    T.folha = 0;*/
 
-    printf("Informe a chave: ");
-    scanf("%d", &key);
+     int control= 0;
+        while(control!=3)
+        {
+          printf("Escolha uma operacao abaixo:\n");
+          printf("1 - Insercao\n 2 - Busca\n 3 - Sair\n");
+          scanf("%d", &control);
+          switch (control)
+          {
+              case 1:
+              printf("entrando na funcao de insercao\n");
+              system("cls");
+              printf("Informe a chave: ");
+              scanf("%d", &key);
+              Inserindo_chave(&T, key);
+              break;
+              case 2:
+              printf("entrando na funcao de busca\n");
+              system("cls");
+              printf("Informe a chave: ");
+              scanf("%d", &key);
+              int aux = Busca_chave(T, key);
+              break;
+              case 3:
+              break;
+          }
+        }
 
-    busca = Busca_chave(T, key);*/
+ //   printf("Informe a chave: ");
+ //   scanf("%d", &key);
 
-    printf("Digite o grau da Arvore B: ");
-    scanf("%d", &grau_arvore);
-    int busca = 0;
+ //   busca = Busca_chave(T, key);*/
+
     int aux;
     int i, j;
 
-    do{
+    /*do{
 
         printf("Informe a chave: ");
         scanf("%d", &key);
@@ -185,9 +276,9 @@ int main()
         printf("Deseja insirir outra chave:");
         scanf("%d", &aux);
 
-    }while(aux == 0);
+    }while(aux == 0);*/
 
-    for(i = 0; i<T.num_chaves; i++){
+    /*for(i = 0; i<T.num_chaves; i++){
             printf("%10d ", T.chave[i]);
         }
         printf("\n");
@@ -196,7 +287,8 @@ int main()
                 printf("%d ", T.ponteiro[i]->chave[j]);
             }
             printf("\n");
-        }
+        }*/
 
     return 0;
 }
+
