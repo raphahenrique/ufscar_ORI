@@ -2,10 +2,28 @@
 #include <stdlib.h>
 #define MAX 1000
 
+/*
+*****************TRABALHO 2******************
+ORI (ORGANIZACAO E RECUPERACAO DA INFORMACAO)
+-----------------ARVORE-B--------------------
+INTEGRANTES DO GRUPO:
+JORGE LUIS J CARVALHO
+LUCAS FRANÇOZO BATAGLIA
+RAPHAEL HENRIQUE F SILVA
+*/
+
 typedef struct No No;
 int grau_arvore, count = 0;
 char caminho[100];
 
+/*Cada nó, possui:
+chave[max-1]: as chaves, em ordem crescente
+num_chaves: numero de chaves do nó
+folha: 1 - se é nó folha, 0 - se é nó interno
+raiz: se é nó raiz ou não
+ponteiro: ponteiros para os filhos do nó
+pai: ponteiro para o nó pai
+*/
 struct No
 {
     int chave[MAX-1];
@@ -14,19 +32,45 @@ struct No
     No *ponteiro[MAX], *pai;
 };
 
+
+/*
+---------------------------------------------------------
+    mediana(No atual)
+
+ Calcular a mediana do nó atual 
+ Recebe: Nó atual passado por parametro 
+ Retorna: a posicao da mediana
+---------------------------------------------------------
+*/
 int mediana (No *atual){
     int aux = atual->num_chaves / 2 + 1;
     return aux;
 
 }
 
+
+/*
+  A funcao cmpfunc é auxiliar de qsort(função para ordenar 
+vetores)
+    cmpfunc é resposável por comparar 2 valores
+*/
 int cmpfunc (const void * a, const void * b)
 {
    return ( *(int*)a - *(int*)b );
 }
 
 
+/*
+---------------------------------------------------------
+    Verifica_num_chaves(No *atual)
 
+ Calcula e retorna se o número de chaves no nó passado atingiu
+o número máximo de chaves (2t-1).
+ Recebe: O ponteiro para o Nó atual.
+ Retorna: 0 se o nó está cheio, isto é nro de chaves = 2t-1;
+ ou 1 se nó ainda não atingiu o nro máximo.
+---------------------------------------------------------
+*/
 int Verifica_num_chaves(No *atual){
     if((atual->raiz == 1 && atual->num_chaves < (grau_arvore - 1)) || (atual->num_chaves >= (grau_arvore - 1) && atual->num_chaves < (2 * grau_arvore - 1))  )
         return 1;
@@ -34,6 +78,16 @@ int Verifica_num_chaves(No *atual){
         return 0;
 }
 
+
+/*
+---------------------------------------------------------
+    Divide_No(No *atual)
+
+ Caso o nó raiz esteja cheio, o divide em dois, filhosesq
+e filhosdir.
+ Recebe: O ponteiro para o Nó atual.
+---------------------------------------------------------
+*/
 void Divide_No(No *atual){
     int aux = mediana(atual) - 1;
     No filhodir, filhoesq;
@@ -60,6 +114,16 @@ void Divide_No(No *atual){
     atual->num_chaves = 1;
 }
 
+
+/*
+---------------------------------------------------------
+    Divide_no_filho(No *atual)
+
+ Divide nós filhos, a mediana é jogada para seu pai, e 
+seus ponteiros rearranjados.
+ Recebe: O ponteiro para o Nó atual.
+---------------------------------------------------------
+*/
 void Divide_no_filho(No *atual){
     int aux = mediana(atual) - 1;
     int i;
@@ -93,17 +157,28 @@ void Divide_no_filho(No *atual){
 
 }
 
+
+/*
+---------------------------------------------------------
+    Inserindo_chave(No *atual, int key)
+
+ Insere uma nova chave na árvore (dependendo do estado 
+do nó atual).
+ Recebe: O ponteiro para o Nó atual e a própria chave.
+ 
+---------------------------------------------------------
+*/
 void Inserindo_chave(No *atual, int key){
     int aux;
     aux = Verifica_num_chaves(atual);
     int i = 0;
 
-    if(aux == 1 && atual->folha == 1){
+    if(aux == 1 && atual->folha == 1){//Caso aux = 1 (Nó não está cheio e é folha)
         atual->chave[atual->num_chaves] = key;
         atual->num_chaves++;
         qsort(atual->chave, atual->num_chaves, sizeof(int), cmpfunc);
     }
-    else if(aux == 1 && atual->folha == 0){
+    else if(aux == 1 && atual->folha == 0){//Caso aux = 1 (Nó não está cheio e não é folha)
             for(i=0; i<atual->num_chaves ;i++){
                 if(key < atual->chave[i]){
                     Inserindo_chave(atual->ponteiro[i], key);
@@ -112,14 +187,16 @@ void Inserindo_chave(No *atual, int key){
                     Inserindo_chave(atual->ponteiro[i+1], key);
             }
     }
-    else if(aux == 0 && atual->raiz == 1){
+    else if(aux == 0 && atual->raiz == 1){//Caso aux = 0 (Nó está cheio) e é raiz
+                                        //Chama-se a Divide_No
         atual->chave[atual->num_chaves] = key;
         atual->num_chaves++;
         qsort(atual->chave, atual->num_chaves, sizeof(int), cmpfunc);
         Divide_No(atual);
         atual->folha = 0;
     }
-    else if(aux == 0 && atual->folha == 1){
+    else if(aux == 0 && atual->folha == 1){//Caso aux = 0 (Nó está cheio) e é folha
+                                        //Chama-se a Divide_no_filho
         atual->chave[atual->num_chaves] = key;
         atual->num_chaves++;
         qsort(atual->chave, atual->num_chaves, sizeof(int), cmpfunc);
@@ -128,20 +205,37 @@ void Inserindo_chave(No *atual, int key){
     }
 }
 
+
+/*
+---------------------------------------------------------
+    Busca_chave(No atual, int key)
+
+ Busca pela chave desejada, se encontrada, mostra o indice
+que na qual foi encontrada, se não encontrar informa
+uma busca sem sucesso.
+ Recebe: O Nó atual e a chave a ser buscada.
+ Retorna: o índice da chave na qual foi encontrada, ou
+se não encontrar, retorna busca sem sucesso.
+---------------------------------------------------------
+*/
 int Busca_chave(No atual, int key){
     int i = 0;
     No *pont;
+    int countVertical = 0;
+    int countHorizontal = 0;
     do{
             if(key == atual.chave[i]){
                 printf("Foi encontrada no indice: %d", i);
                 while(pont !=NULL){
                     pont = atual.pai;
-                    count++;
+                    countVertical++;
                 }
+                printf(" Nivel vertical: %d\n",countVertical);
+
                 return key;
             }
             else if(key < atual.chave[i] && atual.folha == 0){
-                    sprintf(caminho, "%d", i);
+                    //sprintf(caminho, "%d", i);
                     count++;
                     return Busca_chave(*atual.ponteiro[i], key);
             }
@@ -151,10 +245,19 @@ int Busca_chave(No atual, int key){
             i++;
 
     } while (i < atual.num_chaves );
-    printf("Busca sem sucesso");
+    printf("CHAVE NAO ENCONTRADA!");
     return 0;
 }
 
+
+/*
+---------------------------------------------------------
+    Criar_arvore(No *atual)
+
+ Recebe um nó e o transforma na raiz de uma nova árvore.
+ Recebe: Um nó.
+ ---------------------------------------------------------
+*/
 void Criar_arvore(No *atual){
 
     atual->num_chaves = 0;
@@ -164,13 +267,14 @@ void Criar_arvore(No *atual){
 
 }
 
+
 int main(int argc, char *argv[])
 {
     No T;
     if (argc==3)
     {
         Criar_arvore(&T);
-        printf("Arvore criada com sucesso.");
+        printf("Arvore criada com sucesso.\n");
     }
 
     grau_arvore = atoi(argv[2]);
@@ -234,22 +338,22 @@ int main(int argc, char *argv[])
      int control= 0;
         while(control!=3)
         {
-          printf("Escolha uma operacao abaixo:\n");
-          printf("1 - Insercao\n 2 - Busca\n 3 - Sair\n");
+          printf("\nEscolha uma operacao abaixo:\n");
+          printf(" 1 - Insercao\n 2 - Busca\n 3 - Sair\n");
           scanf("%d", &control);
           switch (control)
           {
               case 1:
               printf("entrando na funcao de insercao\n");
               system("cls");
-              printf("Informe a chave: ");
+              printf("Informe a chave para insercao: ");
               scanf("%d", &key);
               Inserindo_chave(&T, key);
               break;
               case 2:
               printf("entrando na funcao de busca\n");
               system("cls");
-              printf("Informe a chave: ");
+              printf("Informe a chave para busca: ");
               scanf("%d", &key);
               int aux = Busca_chave(T, key);
               break;
